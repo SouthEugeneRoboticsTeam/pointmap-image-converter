@@ -5,7 +5,7 @@ from math import sqrt
 
 actual_dimensions = (8.2296, 16.4592)  # Dimensions of the field  in width and length (meters)
 
-scale = 100  # 100 pixels per meter
+scale = 50  # pixels per meter
 
 def coord_sort(coordinates):
     return sqrt(coordinates[0]**2 + coordinates[1]**2)
@@ -34,15 +34,12 @@ def scale_pointcloud(ptcloud):
             l_y = point[1]
         if point[1] > h_y:
             h_y = point[1]
-    print(l_x, l_y, h_x, h_y)
     height = h_y - l_y
     width = h_x - l_x
-    print(width, height)
 
     # Find meters / pixel
     w_mpp = actual_dimensions[1] / width
     h_mpp = actual_dimensions[0] / height
-    print(w_mpp, h_mpp)
     for point in pointcloud:
         point[0] *= w_mpp * scale
         point[1] *= h_mpp * scale
@@ -50,10 +47,9 @@ def scale_pointcloud(ptcloud):
 
 reader = Image.open("map.png")
 pix = reader.load()
-print(reader.size)
 pointcloud = build_pointcloud(pix, reader.size)
 
-window = GraphWin(height=2000, width=2000, title="Point Map")
+window = GraphWin(height=600, width=1000, title="Point Map")
 
 scale_pointcloud(pointcloud)
 
@@ -62,8 +58,8 @@ for point in pointcloud:
 
 
 # We use this line drawing for scale
-Line(Point(100, 100), Point(100 + scale, 100)).draw(window)
-Line(Point(100, 100), Point(100, 100 + scale)).draw(window)
+Line(Point(5, 5), Point(5 + scale, 5)).draw(window)
+Line(Point(5, 5), Point(5, 5 + scale)).draw(window)
 
-while window.isOpen():
-    pass
+window.getMouse()
+window.close()
