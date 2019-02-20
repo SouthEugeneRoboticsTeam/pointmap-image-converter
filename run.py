@@ -1,14 +1,12 @@
 from PIL import Image
 from graphics import GraphWin, Point, Line
 from math import sqrt
+from sys import argv
 
 
 actual_dimensions = (8.2296, 16.4592)  # Dimensions of the field  in width and length (meters)
 
 scale = 50  # pixels per meter
-
-def coord_sort(coordinates):
-    return sqrt(coordinates[0]**2 + coordinates[1]**2)
 
 
 def build_pointcloud(pixels, size, threshold=5):
@@ -34,6 +32,7 @@ def scale_pointcloud(ptcloud):
             l_y = point[1]
         if point[1] > h_y:
             h_y = point[1]
+    print(l_x)
     height = h_y - l_y
     width = h_x - l_x
 
@@ -49,17 +48,27 @@ reader = Image.open("map.png")
 pix = reader.load()
 pointcloud = build_pointcloud(pix, reader.size)
 
-window = GraphWin(height=600, width=1000, title="Point Map")
+if len(argv) > 1:
+    if argv[1] == "-visual":
+        scale_pointcloud(pointcloud)
+        window = GraphWin(height=600, width=1000, title="Point Map")
 
-scale_pointcloud(pointcloud)
+        for point in pointcloud:
+            Point(point[0], point[1]).draw(window)
 
-for point in pointcloud:
-    Point(point[0], point[1]).draw(window)
+        # We use this line drawing for scale
+        Line(Point(5, 5), Point(5 + scale, 5)).draw(window)
+        Line(Point(5, 5), Point(5, 5 + scale)).draw(window)
 
-
-# We use this line drawing for scale
-Line(Point(5, 5), Point(5 + scale, 5)).draw(window)
-Line(Point(5, 5), Point(5, 5 + scale)).draw(window)
-
-window.getMouse()
-window.close()
+        window.getMouse()
+        window.close()
+    else:
+        print("Invalid command!")
+        exit(0)
+else:
+    scale = 1
+    scale_pointcloud(pointcloud)
+    map_file = open("map.txt", 'w')
+    map_file.write(str(len(pointcloud)) + ":")
+    for point in pointcloud:
+        map_file.write('&' + str(point[0]) + ',' + str(point[1]))
